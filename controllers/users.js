@@ -2,7 +2,7 @@ const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(201).send(users))
+    .then((users) => res.status(200).send(users))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
@@ -50,7 +50,11 @@ module.exports.patchUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(userId, { name, about })
     .then((updateUser) => {
-      res.status(201).send(updateUser);
+      if (!updateUser) {
+        res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });
+      } else {
+        res.status(200).send(updateUser);
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -69,7 +73,11 @@ module.exports.patchUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(userId, { avatar })
     .then((updateUserAvatar) => {
-      res.status(201).send(updateUserAvatar);
+      if (!updateUserAvatar) {
+        res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });
+      } else {
+        res.status(200).send(updateUserAvatar);
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
