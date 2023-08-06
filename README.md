@@ -14,3 +14,7 @@
 
 `npm run start` — запускает сервер   
 `npm run dev` — запускает сервер с hot-reload
+`npm run lint`, - показывет ошибки Eslint 
+`npm run lint-fix` - фиксит ошибки, которые показывает Eslint
+
+### [Ссылка на репозиторий](https://github.com/AndyShatzzz/express-mesto-gha.git)
