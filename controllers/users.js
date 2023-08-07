@@ -48,7 +48,7 @@ module.exports.patchUser = (req, res) => {
   const userId = req.user._id;
 
   const { name, about } = req.body;
-  User.findByIdAndUpdate(userId, { name, about })
+  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((updateUser) => {
       if (!updateUser) {
         res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });
@@ -71,7 +71,7 @@ module.exports.patchUserAvatar = (req, res) => {
   const userId = req.user._id;
 
   const { avatar } = req.body;
-  User.findByIdAndUpdate(userId, { avatar })
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((updateUserAvatar) => {
       if (!updateUserAvatar) {
         res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });

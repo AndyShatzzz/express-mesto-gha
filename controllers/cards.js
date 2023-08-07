@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(201).send(cards))
+    .then((cards) => res.status(200).send(cards))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
@@ -31,7 +31,11 @@ module.exports.deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(cardId)
     .then((card) => {
-      res.status(201).send({ data: card });
+      if (!card) {
+        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+      } else {
+        res.status(200).send(card);
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -50,7 +54,11 @@ module.exports.putCardLike = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
-      res.status(201).send({ data: card });
+      if (!card) {
+        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+      } else {
+        res.status(200).send({ data: card });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -69,7 +77,11 @@ module.exports.putDislikeCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
-      res.status(201).send({ data: card });
+      if (!card) {
+        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+      } else {
+        res.status(200).send({ data: card });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
