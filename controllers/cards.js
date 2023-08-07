@@ -38,7 +38,7 @@ module.exports.deleteCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({
           message: 'Пожалуйста, проверьте правильность введенных данных.',
         });
@@ -61,7 +61,7 @@ module.exports.putCardLike = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({
           message: 'Пожалуйста, проверьте правильность введенных данных.',
         });
@@ -84,7 +84,7 @@ module.exports.putDislikeCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({
           message: 'Пожалуйста, проверьте правильность введенных данных.',
         });
