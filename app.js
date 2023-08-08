@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 
 const mongoose = require('mongoose');
@@ -24,11 +23,18 @@ app.use((req, res, next) => {
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: err.message || 'На сервере произошла ошибка.' });
+  }
+  next();
+});
+
 app.use('*', (req, res) => {
   res.status(404).send({ message: 'Страница не найдена' });
 });
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {
   console.log('Ссылка на сервер');

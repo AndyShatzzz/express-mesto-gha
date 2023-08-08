@@ -1,12 +1,14 @@
 const Card = require('../models/card');
+const { ErrorBadRequest, ErrorNotFound } = require('../errors/errors');
+const errorMessage = require('../utils/constants');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((cards) => res.send(cards))
+    .catch((error) => next(error));
 };
 
-module.exports.postCard = (req, res) => {
+module.exports.postCard = (req, res, next) => {
   const userId = req.user._id;
 
   const { name, link } = req.body;
@@ -15,81 +17,73 @@ module.exports.postCard = (req, res) => {
     .then((newCard) => {
       res.status(201).send(newCard);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+        next(new ErrorNotFound(errorMessage.cardNotFoundMessage));
       } else {
-        res.status(200).send(card);
+        res.send(card);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ErrorBadRequest(errorMessage.cardBadRequestMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.putCardLike = (req, res) => {
+module.exports.putCardLike = (req, res, next) => {
   const userId = req.user._id;
 
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+        next(new ErrorNotFound(errorMessage.cardNotFoundMessage));
       } else {
-        res.status(200).send({ data: card });
+        res.send({ data: card });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ErrorBadRequest(errorMessage.cardBadRequestMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.putDislikeCard = (req, res) => {
+module.exports.putDislikeCard = (req, res, next) => {
   const userId = req.user._id;
 
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: `По данному id:${cardId} карточка не была найдена` });
+        next(new ErrorNotFound(errorMessage.cardNotFoundMessage));
       } else {
-        res.status(200).send({ data: card });
+        res.send({ data: card });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ErrorBadRequest(errorMessage.cardBadRequestMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };

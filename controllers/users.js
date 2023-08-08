@@ -1,91 +1,87 @@
 const User = require('../models/user');
+const { ErrorBadRequest, ErrorNotFound } = require('../errors/errors');
+const errorMessage = require('../utils/constants');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((error) => next(error));
 };
 
-module.exports.getUserId = (req, res) => {
+module.exports.getUserId = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: `По данному id: ${userId} пользователь не был найден` });
+        next(new ErrorNotFound(errorMessage.userNotFoundMessage));
       } else {
-        res.status(200).send(user);
+        res.send(user);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: `Данный id пользователя некорректен: ${userId}` });
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ErrorBadRequest(errorMessage.userBadRequestMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.postUsers = (req, res) => {
+module.exports.postUsers = (req, res, next) => {
   const newUserData = req.body;
 
   User.create(newUserData)
     .then((newUser) => {
       res.status(201).send(newUser);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.patchUser = (req, res) => {
+module.exports.patchUser = (req, res, next) => {
   const userId = req.user._id;
 
   const { name, about } = req.body;
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((updateUser) => {
       if (!updateUser) {
-        res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });
+        next(new ErrorNotFound(errorMessage.userNotFoundMessage));
       } else {
-        res.status(200).send(updateUser);
+        res.send(updateUser);
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
 
-module.exports.patchUserAvatar = (req, res) => {
+module.exports.patchUserAvatar = (req, res, next) => {
   const userId = req.user._id;
 
   const { avatar } = req.body;
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((updateUserAvatar) => {
       if (!updateUserAvatar) {
-        res.status(404).send({ message: `По данному id:${userId} пользователь не был найден` });
+        next(new ErrorNotFound(errorMessage.userNotFoundMessage));
       } else {
-        res.status(200).send(updateUserAvatar);
+        res.send(updateUserAvatar);
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message: 'Пожалуйста, проверьте правильность введенных данных.',
-        });
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
       } else {
-        res.status(500).send({ message: 'Непредвиденная ошибка' });
+        next(error);
       }
     });
 };
