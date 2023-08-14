@@ -19,7 +19,7 @@ module.exports.postCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
+        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
       } else {
         next(error);
       }

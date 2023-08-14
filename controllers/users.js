@@ -1,5 +1,14 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
 const User = require('../models/user');
-const { ErrorBadRequest, ErrorNotFound } = require('../errors/errors');
+
+const {
+  ErrorBadRequest,
+  ErrorNotFound,
+  UnauthorizedError,
+  ErrorConflictingRequest,
+} = require('../errors/errors');
 const errorMessage = require('../utils/constants');
 
 module.exports.getUsers = (req, res, next) => {
@@ -28,16 +37,20 @@ module.exports.getUserId = (req, res, next) => {
     });
 };
 
-module.exports.postUsers = (req, res, next) => {
-  const newUserData = req.body;
-
-  User.create(newUserData)
-    .then((newUser) => {
-      res.status(201).send(newUser);
+module.exports.createUsers = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      email: req.body.email,
+      password: hash,
+    }))
+    .then((user) => {
+      res.send({ email: user.email, _id: user._id });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
+        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
+      } else if (error.code === 11000) {
+        next(new ErrorConflictingRequest(errorMessage.conflictingRequestMessage));
       } else {
         next(error);
       }
@@ -58,7 +71,7 @@ module.exports.patchUser = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
+        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
       } else {
         next(error);
       }
@@ -79,7 +92,42 @@ module.exports.patchUserAvatar = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ErrorBadRequest(errorMessage.ValidationErrorMessage));
+        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
+      } else {
+        next(error);
+      }
+    });
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      res.status(201).send({ token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }) });
+    })
+    .catch((error) => {
+      if (error.name === 'Unauthorized') {
+        next(new UnauthorizedError(errorMessage.unauthorizedErrorMessage));
+      } else {
+        next(error);
+      }
+    });
+};
+
+module.exports.getUserMe = (req, res, next) => {
+  const userId = req.user._id;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        next(new ErrorNotFound(errorMessage.userNotFoundMessage));
+      } else {
+        res.send(user);
+      }
+    })
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
       } else {
         next(error);
       }
