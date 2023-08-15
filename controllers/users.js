@@ -103,7 +103,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
-      res.status(201).send({ token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }) });
+      res.status(200).send({ token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }) });
     })
     .catch((error) => {
       if (error.name === 'Unauthorized') {
@@ -114,7 +114,7 @@ module.exports.login = (req, res, next) => {
     });
 };
 
-module.exports.getUserMe = (req, res, next) => {
+module.exports.getUserMeOwn = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)

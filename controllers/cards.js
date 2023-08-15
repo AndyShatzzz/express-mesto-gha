@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { ErrorBadRequest, ErrorNotFound } = require('../errors/errors');
+const { ErrorBadRequest, ErrorNotFound, ErrorForbidden } = require('../errors/errors');
 const errorMessage = require('../utils/constants');
 
 module.exports.getCards = (req, res, next) => {
@@ -28,18 +28,24 @@ module.exports.postCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-
-  Card.findByIdAndRemove(cardId)
+  const userId = req.user._id;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        next(new ErrorNotFound(errorMessage.cardNotFoundMessage));
+        throw new ErrorNotFound(errorMessage.cardNotFoundMessage);
+      } else if (userId !== card.owner.toString()) {
+        throw new ErrorForbidden(errorMessage.forbiddenMessage);
       } else {
-        res.send(card);
+        Card.findByIdAndRemove(cardId)
+          .then((removedCard) => res.send(removedCard))
+          .catch((error) => next(error));
       }
     })
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new ErrorBadRequest(errorMessage.cardBadRequestMessage));
+      } else if (error.name === 'Forbidden') {
+        next(new ErrorForbidden(errorMessage.forbiddenMessage));
       } else {
         next(error);
       }

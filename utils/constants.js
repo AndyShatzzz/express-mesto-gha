@@ -8,6 +8,7 @@ const errorMessage = {
   needAuthorizationMessage: 'Необходима авторизация',
   defaultNotFoundMessage: 'Страница не найдена',
   conflictingRequestMessage: 'Пользователь с таким Email уже существует',
+  forbiddenMessage: 'Недостаточно прав для осуществелния данного действия',
 };
 
 module.exports = errorMessage;

@@ -2,12 +2,11 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 
+const { errors } = require('celebrate');
 const router = require('./routes/router');
 
 const errorHandler = require('./middlewares/errorHandler');
 const defaultErrorNotFound = require('./middlewares/defaultErrorNotFound');
-
-const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 

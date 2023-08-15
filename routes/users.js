@@ -5,15 +5,15 @@ const {
   getUserId,
   patchUser,
   patchUserAvatar,
-  getUserMe,
+  getUserMeOwn,
 } = require('../controllers/users');
 
-const { userGetId } = require('../middlewares/validation');
+const { validateUserGetId, validatePatchUser, validatePatchUserAvatar } = require('../middlewares/validation');
 
 router.get('/', getUsers);
-router.get('/:userId', userGetId, getUserId);
-router.patch('/me', patchUser);
-router.patch('/me/avatar', patchUserAvatar);
-router.get('/me', getUserMe);
+router.get('/me', getUserMeOwn);
+router.get('/:userId', validateUserGetId, getUserId);
+router.patch('/me', validatePatchUser, patchUser);
+router.patch('/me/avatar', validatePatchUserAvatar, patchUserAvatar);
 
 module.exports = router;
