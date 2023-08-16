@@ -17,7 +17,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'super-strong-secret');
   } catch (error) {
-    throw new UnauthorizedError(errorMessage.needAuthorizationMessage);
+    next(new UnauthorizedError(errorMessage.needAuthorizationMessage));
   }
 
   req.user = payload;
