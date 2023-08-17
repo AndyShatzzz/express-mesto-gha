@@ -6,7 +6,6 @@ const User = require('../models/user');
 const {
   ErrorBadRequest,
   ErrorNotFound,
-  UnauthorizedError,
   ErrorConflictingRequest,
 } = require('../errors/errors');
 const errorMessage = require('../utils/constants');
@@ -114,13 +113,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       res.status(200).send({ token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }) });
     })
-    .catch((error) => {
-      if (error.name === 'Unauthorized') {
-        next(new UnauthorizedError(errorMessage.unauthorizedErrorMessage));
-      } else {
-        next(error);
-      }
-    });
+    .catch((error) => next(error));
 };
 
 module.exports.getUserMeOwn = (req, res, next) => {
@@ -134,11 +127,5 @@ module.exports.getUserMeOwn = (req, res, next) => {
         res.send(user);
       }
     })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        next(new ErrorBadRequest(errorMessage.validationErrorMessage));
-      } else {
-        next(error);
-      }
-    });
+    .catch((error) => next(error));
 };

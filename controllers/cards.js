@@ -33,14 +33,13 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new ErrorNotFound(errorMessage.cardNotFoundMessage);
-      } else if (userId !== card.owner.toString()) {
-        throw new ErrorForbidden(errorMessage.forbiddenMessage);
-      } else {
-        Card.findByIdAndRemove(cardId)
-          .then((removedCard) => res.send(removedCard))
-          .catch((error) => next(error));
       }
+      if (userId !== card.owner.toString()) {
+        throw new ErrorForbidden(errorMessage.forbiddenMessage);
+      }
+      return Card.findByIdAndRemove(cardId);
     })
+    .then((removedCard) => res.send(removedCard))
     .catch((error) => {
       if (error.name === 'CastError') {
         next(new ErrorBadRequest(errorMessage.cardBadRequestMessage));

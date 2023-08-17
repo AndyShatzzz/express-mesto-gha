@@ -1,22 +1,23 @@
 const { celebrate, Joi } = require('celebrate');
 const regex = require('../utils/validationRegex');
+const validateId = require('../utils/validateId');
 
 module.exports.validateUserGetId = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    userId: validateId,
   }),
 });
 
 module.exports.validateDeleteCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: validateId,
   }),
 });
 
 module.exports.validateCreateUser = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().regex(regex),
@@ -26,7 +27,7 @@ module.exports.validateCreateUser = celebrate({
 module.exports.validateLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 });
 
@@ -52,12 +53,12 @@ module.exports.validatePostCard = celebrate({
 
 module.exports.validateCardLike = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: validateId,
   }),
 });
 
 module.exports.validateCardDislike = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: validateId,
   }),
 });

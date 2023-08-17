@@ -10,7 +10,7 @@
     "lint-fix": "npx eslint . --fix"
   },
   "keywords": [],
-  "author": "",
+  "author": "Andy Shatzzz",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
